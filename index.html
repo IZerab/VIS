@@ -1,0 +1,358 @@
+<!-- This is Lorenzo Beltrame assignment submission for the fifth
+programming assignment for the VIS 2022S 05.06.22 -->
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="main.css">
+  <script src="d3.min.js"></script>
+  <script src="jquery-3.6.0.min.js"></script>
+  <title> A5 assignment visualization </title>
+</head>
+<body>
+
+
+<h1 style="color:red;"> Covid-19 visualization  </h1>
+
+<p>
+  Shares of covid cases on the last day selected. Please select an interval of
+  dates:
+</p>
+
+<label for="start">Start date:</label>
+
+<input type="date" id="date_start" name="start_time"
+       value="2020-03-01"
+       min="2020-01-01" max="2022-12-30"
+       onchange="get_start_dates()">
+
+<label for="start">End date:</label>
+
+<input type="date" id="date_end" name="end_time"
+       value="2021-03-01"
+       min="2020-01-02" max="2022-12-31"
+       onchange="get_end_dates()">
+
+
+
+<! Empty SVG>
+<svg width="800" height="600" id="map"
+  style="position:absolute; left:0px; top:170px;">
+</svg>
+<div id="table" style="position:absolute; left:850px; top:170px;"></div>
+
+
+
+<! Load the data using D3 and insert the labels in the graph >
+<script>
+    var day_end, day_start, month_end, month_start, year_end, year_start;
+    // get the variables from the selector
+    get_end_dates();
+    get_start_dates();
+
+    // acquire dates
+    function get_start_dates() {
+      var date_start=$('#date_start').val().split('-');
+      var day_start=+date_start[2];
+      var month_start=+date_start[1];
+      var year_start=+date_start[0];
+      console.log(day_start);
+    }
+
+    function get_end_dates() {
+      var date_end=$('#date_end').val().split('-');
+      var day_end=+date_end[2];
+      var month_end=+date_end[1];
+      var year_end=+date_end[0];
+      console.log(day_end);
+    }
+
+
+
+
+
+
+
+
+
+
+
+    let svg = d3.select("#map");
+    let mapArea = svg.append("g").attr('transform', "translate(30, 30)");
+
+    // title
+    svg.append("text")
+      .text("Shares of covid cases on the last day selected: ")
+      .attr("y", 20)
+      .attr("x", 370)
+      .attr('text-anchor', 'middle')
+      .style("font-weight","bold");
+
+      svg.append("text")
+        .text("Shares of covid cases on the last day selected: ")
+        .attr("y", 20)
+        .attr("x", 370)
+        .attr('text-anchor', 'middle')
+        .style("font-weight","bold");
+
+
+    // data
+    Promise.all([
+      d3.csv('Final_df.csv'),
+      d3.csv('Continent_grouped.csv')
+    ]).then(([data, continet_data]) => {
+
+        // reset all the selections
+        mapArea.append('rect')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('width', 800)
+          .attr('height', 430)
+          .attr('id', 'back_rect')
+          .style('fill', '#f2f2f2')
+          .on('click', function(){
+            table.reset();  });
+
+        // preprocessing
+        data.forEach(d => {
+          d.BA = +d["ba_and_higher_percent"];
+          d.HS = +d["hs_and_higher_percent"];
+        })
+
+        // get a scale for the colour to get max constrast
+        let colour_scale_BA = d3.scaleLinear()
+            .domain(d3.extent(data.map(a => a.BA)))
+            .range([0.9, 0.15]);
+
+        let colour_scale_HS = d3.scaleLinear()
+            .domain(d3.extent(data.map(a => a.HS)))
+            .range([0.9, 0.2]);
+
+        const proj = d3.geoAlbersUsa();
+        const my_path = d3.geoPath(proj);
+
+        let my_selector = document.getElementById("list_diplomas");
+
+        my_selector.onchange = function() {
+          first_click = true
+          // delete the old map
+          delete map;
+
+          // create a new map
+          let map = mapArea.selectAll("path")
+            .data(geodata.features)
+            .enter()
+            .append('path')
+            .attr('d', my_path)
+            .attr('stroke', 'darkgrey')
+            .attr('stroke-width', 0.5)
+            .attr("transform", "scale(0.8)");
+
+            // fill the countries with different colours
+
+            if (my_selector.value == 1){
+              mapArea.selectAll("path")
+                .data(data)
+                .attr('fill', d => colour_generator_BA(d.HS, colour_scale_HS))
+                .attr('id', d => d["State"])
+                .on("mouseover", function() {
+                    d3.select(this)
+                      .attr("fill", "powderblue")
+                    mapArea.append("text")
+                      .text(this.id)
+                      .attr("x", d3.pointer(event, svg.node())[0])
+                      .attr("y", d3.pointer(event, svg.node())[1])
+                      .attr('id', 'flag')
+                      .style("font-weight","bold")
+                      .style("font-size","20")
+                      .attr("fill", "black");
+                  })
+
+                .on("mouseout", function() {
+                    d3.select(this)
+                      .attr("fill", d => colour_generator_BA(d.HS, colour_scale_HS));
+                    d3.select("#flag").remove();
+                })
+                .on("click", add_state)}
+
+            if (my_selector.value == 2) {
+              mapArea.selectAll("path")
+                .data(data)
+                .attr('id', d => d["State"])
+                .attr('fill', d => colour_generator_BA(d.BA, colour_scale_BA))
+                .on("mouseover", function() {
+                    d3.select(this)
+                      .attr("fill", "powderblue")
+                    mapArea.append("text")
+                      .text(this.id)
+                      .attr("x", d3.pointer(event, svg.node())[0])
+                      .attr("y", d3.pointer(event, svg.node())[1])
+                      .attr('id', 'flag')
+                      .style("font-weight","bold")
+                      .style("font-size","20")
+                      .attr("fill", "black");
+                  })
+
+                .on("mouseout", function() {
+                    d3.select(this)
+                      .attr("fill", d => colour_generator_BA(d.BA, colour_scale_BA));
+                    d3.select("#flag").remove();
+                })
+                .on('click', add_state);
+            }
+
+          }
+          my_selector.onchange();
+
+          // create the TABLE
+          var table = d3.select('#table').append('table');
+          var headers = ["State", "Bachelor", "High school"];
+
+          // create the headers
+          table.create_struct = function() {
+            table.append("thead").append("tr")
+                .selectAll("th")
+                .data(headers)
+                .enter().append("th")
+                .text(function(d) {
+                  return d;
+                })
+                .style("padding", "5px")
+                .style("background-color", "lightgrey");
+          }
+
+
+          // Reset the table
+          table.reset = function() {
+            // recreate the structure
+            table.selectAll("tr").remove()
+            table.create_struct();
+
+            // data
+            let line = table.append("tbody")
+              .selectAll("tr")
+              .data(data)
+              .enter()
+              .append("tr")
+              // Highlighting of the line on mouseover
+              .on("mouseover", function() {
+                  d3.select(this).style("background-color", "pink");
+                })
+              .on("mouseout", function() {
+                  d3.select(this).style("background-color", "transparent");
+              }
+            )
+
+              //fill the lines with content
+              line.append("td") //Name Cell
+                .text(d => d["State"])
+              line.append("td") //Size Cell
+                .text(d => String(d.BA) + " %")
+              line.append("td") //Weight Cell
+                .text(d => String(d.HS) + " %")
+
+              first_click = true
+          }
+
+          table.reset();
+
+          function add_state() {
+                if (first_click) {
+                  table.selectAll("tr").remove();
+                  table.create_struct();
+
+                    console.log(this.id);
+                    console.log();
+                    // data
+                    let line = table.append("tbody")
+                      .selectAll("tr")
+                      .data(data.filter(d => d["State"] == this.id))
+                      .enter()
+                      .append("tr")
+                      // Highlighting of the line on mouseover
+                      .on("mouseover", function() {
+                          d3.select(this).style("background-color", "pink");
+                        })
+                      .on("mouseout", function() {
+                          d3.select(this).style("background-color", "transparent");
+                      })
+
+                      //fill the lines with content
+                      line.append("td") //Name Cell
+                        .text(d => d["State"])
+                      line.append("td") //Size Cell
+                        .text(d => String(d.BA) + " %")
+                      line.append("td") //Weight Cell
+                        .text(d => String(d.HS) + " %")
+
+                      first_click = false;
+
+
+                } else {
+                  // data
+                  let line = table.append("tbody")
+                    .selectAll("tr")
+                    .data(data.filter(d => d["State"] == this.id))
+                    .enter()
+                    .append("tr")
+                    // Highlighting of the line on mouseover
+                    .on("mouseover", function() {
+                        d3.select(this).style("background-color", "pink");
+                      })
+                    .on("mouseout", function() {
+                        d3.select(this).style("background-color", "transparent");
+                    })
+
+                    //fill the lines with content
+                    line.append("td") //Name Cell
+                      .text(d => d["State"])
+                    line.append("td") //Size Cell
+                      .text(d => String(d.BA) + " %")
+                    line.append("td") //Weight Cell
+                      .text(d => String(d.HS) + " %")
+
+                }
+              }
+
+
+    })
+
+
+
+
+
+
+    var first_click = true
+
+
+    // function that assigns a colour to each state
+    function colour_generator_BA(d, colour_scale) {
+      return d3.hsl(10, 0.7, colour_scale(d))
+    }
+
+
+</script>
+
+
+
+
+<style>
+  svg{
+    width:650;
+    height:400;
+  }
+  .line-class{
+    stroke: lightgrey;
+    stroke-width: 2;
+  }
+
+  .line-info{
+    stroke: lightgrey;
+    stroke-width: 0.5;
+  }
+ </style>
+
+
+</body>
+</html>
