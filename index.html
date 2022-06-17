@@ -335,36 +335,32 @@ programming assignment for the VIS 2022S 05.06.22 -->
                   .style("font-weight","bold");
           }
 
-        function create_table() {
-          table = d3.select('#choosing_table').append('table');
-          var headers = ["Country", "Cases_start", "Cases_end"];
+        table = d3.select('#choosing_table').append('table');
+        var headers = ["Country", "Percentage positives", "Vaccines"];
 
-          // create the headers
-          console.log("sfdfsdfsdf111");
-          table.create_struct = function() {
-            table.append("thead").append("tr")
-                .selectAll("th")
-                .data(headers)
-                .enter().append("th")
-                .text(function(d) {
-                  return d.state;
-                })
-                .style("padding", "5px")
-                .style("background-color", "lightgrey");
-          table.reset()
-          }
-
-
-          // Reset the table
-          table.reset = function() {
-            // recreate the structure
-            table.selectAll("tr").remove()
-            table.create_struct();
-          }
+        // create the headers
+        table.create_struct = function() {
+          table.append("thead").append("tr")
+              .selectAll("th")
+              .data(headers)
+              .enter().append("th")
+              .text(function(d) {
+                return d;
+              })
+              .style("padding", "5px")
+              .style("background-color", "lightgrey");
         }
 
-        //create_table();
-        //table.reset();
+        // Reset the table
+        table.reset = function() {
+          // recreate the structure
+          table.selectAll("tr").remove()
+          table.create_struct();
+
+            first_click = true
+        }
+
+        table.reset();
 
         function refresh(){
             if (continent_view) {
@@ -391,16 +387,18 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
         }
 
-        function add_country(){
-          let add_end = data.chosen_continent_data(d => day_end == d.day    &&
-                                                     month_end == d.month   &&
-                                                     year_end == d.year)
-          let selected_data = add_end.filter(d => this.id == d.location)
-
+  function add_country(){
+      let add_end = chosen_continent_data.filter(d => day_end == d.day  &&
+                                                 month_end == d.month   &&
+                                                 year_end == d.year)
+      var selected_data = add_end.filter(d => this.id == d.location)
+      if (first_click) {
+        table.selectAll("tr").remove();
+        table.create_struct();
           // data
           let line = table.append("tbody")
             .selectAll("tr")
-            .data()
+            .data(selected_data)
             .enter()
             .append("tr")
             // Highlighting of the line on mouseover
@@ -409,27 +407,52 @@ programming assignment for the VIS 2022S 05.06.22 -->
               })
             .on("mouseout", function() {
                 d3.select(this).style("background-color", "transparent");
-            }
-          )
+            })
 
             //fill the lines with content
             line.append("td") //Name Cell
               .text(d => d["location"])
             line.append("td") //Size Cell
-              .text(d => String(d["total_cases"]))
+              .text(d => String(d.Percentage.toFixed(2)) + " %")
             line.append("td") //Weight Cell
-              .text(d => String(d.HS) + " %")
+              .text(d => String(d.total_vaccinations))
 
-            first_click = true
-        }
+            first_click = false;
 
-        function countries_to_continent() {
-          active_continent = "None"
-          new_view = false
-          d3.selectAll("to_be_deleted_2").remove()
-          print_barplot(continet_data)
-          d3.selectAll("#to_be_deleted_1").remove();
-        }
+
+      } else {
+        // data
+        let line = table.append("tbody")
+          .selectAll("tr")
+          .data(selected_data)
+          .enter()
+          .append("tr")
+          // Highlighting of the line on mouseover
+          .on("mouseover", function() {
+              d3.select(this).style("background-color", "pink");
+            })
+          .on("mouseout", function() {
+              d3.select(this).style("background-color", "transparent");
+          })
+
+          //fill the lines with content
+          line.append("td") //Name Cell
+            .text(d => d["location"])
+          line.append("td") //Size Cell
+            .text(d => String(d.Percentage.toFixed(2)) + " %")
+          line.append("td") //Weight Cell
+            .text(d => String(d.total_vaccinations))
+
+      }
+    }
+
+      function countries_to_continent() {
+        active_continent = "None"
+        new_view = false
+        d3.selectAll("to_be_deleted_2").remove()
+        print_barplot(continet_data)
+        d3.selectAll("#to_be_deleted_1").remove();
+      }
 
         function go_back_to_continent(){
           continent_view = true
