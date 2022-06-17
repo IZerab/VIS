@@ -23,7 +23,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
 <h1 style="color:red;"> Covid-19 visualization  </h1>
 
 
-<div class=class="container-fluid">
+<div class=class="container-fluid" id="big_container">
  <div class="row" style="background-color:#969892;">
    <div>
        <label for="start">Start date:</label>
@@ -43,7 +43,8 @@ programming assignment for the VIS 2022S 05.06.22 -->
    </svg>
    <div class="col-sm" id="choosing_table" style="background-color:#e8e2e1;">
    </div>
- </div>
+  </div>
+  </div>
 </div>
 
 
@@ -73,11 +74,11 @@ programming assignment for the VIS 2022S 05.06.22 -->
       var table;
       var active_continent, my_active_data;
       // plot management
-      var continent_view;
+      var continent_view, go_to_second_view;
+
 
       continent_view = true;
       d3.select("#date_end").node().oninput = get_end_dates
-      d3.select("#choosing_barplot").node().oninput = go_back_to_continent
 
 
 
@@ -162,6 +163,16 @@ programming assignment for the VIS 2022S 05.06.22 -->
           .domain(continet_data.map(function(d) { return d.continent; }))
           .padding(0.2);
 
+        var rectangle = svg.append("rect")
+          .attr("x", 0)
+          .attr("y", 0)
+          .attr("width", 1000)
+          .attr('fill', '#e8e2e1')
+          .attr("height", 500)
+          .attr('id', 'to_be_deleted_final_1')
+          .on('click', go_back_to_continent )
+
+
         svg.append("g")
           .attr("transform", "translate(0," + height + ")")
           .call(d3.axisBottom(x))
@@ -193,6 +204,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
           .data(data_end_day)
           .enter()
           .append("rect")
+            .attr('class', 'barplot')
             .attr("x", function(d) { return x(d.continent); })
             .attr("y", function(d) { return y(d.Percentage);})
             .attr("width", x.bandwidth())
@@ -259,6 +271,16 @@ programming assignment for the VIS 2022S 05.06.22 -->
               .style("font-size", "12")
               .style("font-weight","bold");
 
+
+          var rectangle = svg.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", 1000)
+            .attr('fill', '#e8e2e1')
+            .attr("height", 500)
+            .attr('id', 'to_be_deleted_final_1')
+            .on('click', go_back_to_continent )
+
           // Add Y axis
           // compute the max
           let data_end_day = active_data.filter(d => day_end == d.day       &&
@@ -280,6 +302,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .append("rect")
               .attr("x", function(d) { return x(d.location); })
               .attr("y", function(d) { return y(d.Percentage);})
+              .attr('class', 'barplot')
               .attr("width", x.bandwidth())
               .attr('id', function(d) { return d.location})
               .attr("height", function(d) { return height - y(d.Percentage); })
@@ -345,9 +368,12 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
         function refresh(){
             if (continent_view) {
+              console.log("sfdsfsdfsdf");
               d3.selectAll("#to_be_deleted_1").remove();
+              d3.selectAll("#to_be_deleted_2").remove();
               print_barplot(continet_data);
             } else {
+              d3.selectAll("#to_be_deleted_1").remove();
               d3.selectAll("#to_be_deleted_2").remove();
               print_barplot_countries(chosen_continent_data);
             }
@@ -362,6 +388,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
             )
             continent_view = false
             print_barplot_countries(chosen_continent_data)
+
         }
 
         function add_country(){
@@ -401,13 +428,13 @@ programming assignment for the VIS 2022S 05.06.22 -->
           new_view = false
           d3.selectAll("to_be_deleted_2").remove()
           print_barplot(continet_data)
+          d3.selectAll("#to_be_deleted_1").remove();
         }
 
         function go_back_to_continent(){
-            continent_view = true;
-            refresh();
+          continent_view = true
+          refresh()
         }
-
 
   })
 
