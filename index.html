@@ -24,27 +24,37 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
 
 <div class=class="container-fluid" id="big_container">
- <div class="row" style="background-color:#969892;">
-   <div>
-       <label for="start">Start date:</label>
-       <input type="date" id="date_start" name="start_time"
-              value="2020-03-01"
-              min="2020-01-01" max="2022-12-30"
-              onchange="get_start_dates()">
+    <div class="row align-items-center" style="background-color:#969892;">
+        <div class="row justify-content-sm-center" style="background-color:#e8e2e1;" >
+            <div class="col-md-auto" >
+          <label for="start">Start date:</label>
+          <input type="date" id="date_start" name="start_time"
+                 value="2020-03-01"
+                 min="2020-01-01" max="2022-12-30"
+                 onchange="get_start_dates()">
+        </div>
+            <div class="col-md-auto" >
+          <label for="start">End date:</label>
 
-       <label for="start">End date:</label>
+          <input type="date" id="date_end" name="end_time"
+                 value="2021-03-01"
+                 min="2020-01-02" max="2022-12-31">
+        </div>
+            <div class="col-md-auto">
+                <button type="button" class="btn btn-sm btn-block h-100 btn-outline-primary">Compare</button>
+        </div>
+        </div>
 
-       <input type="date" id="date_end" name="end_time"
-              value="2021-03-01"
-              min="2020-01-02" max="2022-12-31">
- </div>
- <div class="row">
-   <svg class="col-7" id="choosing_barplot" style="background-color:#e8e2e1;">
-   </svg>
-   <div class="col-sm" id="choosing_table" style="background-color:#e8e2e1;">
-   </div>
-  </div>
-  </div>
+    </div>
+
+    <div class="row" style="background-color:#e8e2e1;">
+       <div class="col">
+           <svg class="row-7" id="choosing_barplot" style="background-color:#e8e2e1;"></svg>
+       </div>
+       <div class="col">
+           <div class="row-sm" id="choosing_table" style="background-color:#e8e2e1;"></div>
+       </div>
+    </div>
 </div>
 
 
@@ -55,10 +65,6 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
 <! Load the data using D3 and insert the labels in the graph >
 <script>
-
-
-
-
 
     // data
     Promise.all([
@@ -71,10 +77,14 @@ programming assignment for the VIS 2022S 05.06.22 -->
       var day_end, day_start, month_end, month_start, year_end, year_start;
       var data_start, data_end, data_table;
       // table management
-      var table;
+      var table, vect_double;
       var active_continent, my_active_data;
+      var max_countries
       // plot management
       var continent_view, go_to_second_view;
+
+      vect_double = []
+      max_countries = 0
 
 
       continent_view = true;
@@ -103,9 +113,86 @@ programming assignment for the VIS 2022S 05.06.22 -->
         d.Percentage = +d["Percentage"];
       })
 
+      // Initialise the table
+      table = d3.select('#choosing_table').append('table');
+      var headers = ["Country", "Percentage positives", "Vaccines"];
+
+      // function to handle the data
+      table.create_struct = function() {
+        table.append("thead").append("tr")
+            .selectAll("th")
+            .data(headers)
+            .enter().append("th")
+            .text(function(d) {
+              return d;
+            })
+            .style("padding", "5px")
+            .style("background-color", "lightgrey");
+      }
+
+      // Reset the table
+      table.reset = function() {
+        // recreate the structure
+        table.selectAll("tr").remove()
+        table.create_struct();
+        first_click = true
+      }
+
+      // update the data_table
+      table.update = function(){
+        // recreate the structure
+        table.selectAll("tr").remove();
+        table.create_struct();
+        // get the new data saved
+        let add_end = countries_data.filter(d => day_end == d.day  &&
+                                                   month_end == d.month   &&
+                                                   year_end == d.year)
+        var selected_data = add_end.filter(d => vect_double.includes(d["location"]))
+
+        table.selectAll("tr").remove();
+        table.create_struct();
+          // data
+          let line = table.append("tbody")
+            .selectAll("tr")
+            .data(selected_data)
+            .enter()
+            .append("tr")
+            .attr('id', "table" + String(selected_data[0]["location"]).replace(" ", "_"))
+            // Highlighting of the line on mouseover
+            .on("mouseover", function() {
+                d3.select(this).style("background-color", "pink");
+              })
+            .on("mouseout", function() {
+                d3.select(this).style("background-color", "transparent");
+            })
+            .on("click", function() {
+                d3.select("#" + String(this.id)).remove();
+                console.log("#" + String(this.id));
+                for(var i = 0; i < vect_double.length; i++){
+                    if (selected_data[0]["location"] === vect_double[i]) {
+                      vect_double.splice(i, 1);
+                      i--;
+                    }
+                  }
+                  max_countries = max_countries - 1
+            })
+
+            //fill the lines with content
+            line.append("td") //Name Cell
+              .text(d => d["location"])
+            line.append("td") //Size Cell
+              .text(d => String(d.Percentage.toFixed(2)) + " %")
+            line.append("td") //Weight Cell
+              .text(d => String(d.total_vaccinations))
+
+      }
+
+      table.reset();
       // get the variables from the selector
+      initialization = true
       get_end_dates();
       get_start_dates();
+      initialization = false
 
 
 
@@ -120,7 +207,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
                                   year_start == d.year )
 
         data_table = [data_start, data_end]
-        refresh();
+        update_dates();
       }
 
       function get_end_dates() {
@@ -129,12 +216,12 @@ programming assignment for the VIS 2022S 05.06.22 -->
         month_end=+date_end[1];
         year_end=+date_end[0];
 
-        data_end = data.filter(d => day_end == d.day   &&
+        data_end = data.filter(d => day_end == d.day     &&
                                   month_end == d.month   &&
                                   year_end == d.year )
 
         data_table = [data_start, data_end]
-        refresh();
+        update_dates();
       }
 
 
@@ -335,43 +422,29 @@ programming assignment for the VIS 2022S 05.06.22 -->
                   .style("font-weight","bold");
           }
 
-        table = d3.select('#choosing_table').append('table');
-        var headers = ["Country", "Percentage positives", "Vaccines"];
 
-        // create the headers
-        table.create_struct = function() {
-          table.append("thead").append("tr")
-              .selectAll("th")
-              .data(headers)
-              .enter().append("th")
-              .text(function(d) {
-                return d;
-              })
-              .style("padding", "5px")
-              .style("background-color", "lightgrey");
-        }
 
-        // Reset the table
-        table.reset = function() {
-          // recreate the structure
-          table.selectAll("tr").remove()
-          table.create_struct();
-
-            first_click = true
-        }
-
-        table.reset();
-
-        function refresh(){
+        function update_dates(){
             if (continent_view) {
               console.log("sfdsfsdfsdf");
               d3.selectAll("#to_be_deleted_1").remove();
               d3.selectAll("#to_be_deleted_2").remove();
               print_barplot(continet_data);
+              if (initialization) {
+                  // pass
+              } else {
+                  table.update()
+              }
+
             } else {
               d3.selectAll("#to_be_deleted_1").remove();
               d3.selectAll("#to_be_deleted_2").remove();
               print_barplot_countries(chosen_continent_data);
+              if (initialization) {
+                  // pass
+              } else {
+                  table.update()
+              }
             }
         }
 
@@ -388,10 +461,11 @@ programming assignment for the VIS 2022S 05.06.22 -->
         }
 
   function add_country(){
-      let add_end = chosen_continent_data.filter(d => day_end == d.day  &&
+      let add_end = countries_data.filter(d => day_end == d.day         &&
                                                  month_end == d.month   &&
                                                  year_end == d.year)
       var selected_data = add_end.filter(d => this.id == d.location)
+
       if (first_click) {
         table.selectAll("tr").remove();
         table.create_struct();
@@ -401,6 +475,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .data(selected_data)
             .enter()
             .append("tr")
+            .attr('id', "table" + String(selected_data[0]["location"]).replace(" ", "_"))
             // Highlighting of the line on mouseover
             .on("mouseover", function() {
                 d3.select(this).style("background-color", "pink");
@@ -408,6 +483,18 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .on("mouseout", function() {
                 d3.select(this).style("background-color", "transparent");
             })
+            .on("click", function() {
+                d3.select("#" + String(this.id)).remove();
+                console.log("#" + String(this.id));
+                for(var i = 0; i < vect_double.length; i++){
+                    if (selected_data[0]["location"] === vect_double[i]) {
+                      vect_double.splice(i, 1);
+                      i--;
+                    }
+                  }
+                  max_countries = max_countries - 1
+            })
+
 
             //fill the lines with content
             line.append("td") //Name Cell
@@ -417,32 +504,64 @@ programming assignment for the VIS 2022S 05.06.22 -->
             line.append("td") //Weight Cell
               .text(d => String(d.total_vaccinations))
 
+            // utils
             first_click = false;
+            vect_double.push(selected_data[0]["location"])
+            max_countries = max_countries + 1
 
 
       } else {
-        // data
-        let line = table.append("tbody")
-          .selectAll("tr")
-          .data(selected_data)
-          .enter()
-          .append("tr")
-          // Highlighting of the line on mouseover
-          .on("mouseover", function() {
-              d3.select(this).style("background-color", "pink");
-            })
-          .on("mouseout", function() {
-              d3.select(this).style("background-color", "transparent");
-          })
+          if (vect_double.includes(selected_data[0]["location"])) {
+              d3.select("#table" + String(selected_data[0]["location"]).replace(" ", "_")).remove()
+              for(var i = 0; i < vect_double.length; i++){
+                  if (selected_data[0]["location"] === vect_double[i]) {
+                    vect_double.splice(i, 1);
+                    i--;
+                  }
+                }
+                max_countries = max_countries - 1
+        } else {
+            if (max_countries < 10) {
+            // data
+            let line = table.append("tbody")
+              .selectAll("tr")
+              .data(selected_data)
+              .enter()
+              .append("tr")
+              .attr('id', "table" + String(selected_data[0]["location"]).replace(" ", "_"))
+              // Highlighting of the line on mouseover
+              .on("mouseover", function() {
+                  d3.select(this).style("background-color", "pink");
+                })
+              .on("mouseout", function() {
+                  d3.select(this).style("background-color", "transparent");
+              })
+              .on("click", function() {
+                  d3.select("#" + String(this.id)).remove();
+                  console.log("#" + String(this.id));
+                  for(var i = 0; i < vect_double.length; i++){
+                      if (selected_data[0]["location"] === vect_double[i]) {
+                        vect_double.splice(i, 1);
+                        i--;
+                      }
+                    }
+                    max_countries = max_countries - 1
+              })
 
-          //fill the lines with content
-          line.append("td") //Name Cell
-            .text(d => d["location"])
-          line.append("td") //Size Cell
-            .text(d => String(d.Percentage.toFixed(2)) + " %")
-          line.append("td") //Weight Cell
-            .text(d => String(d.total_vaccinations))
 
+              //fill the lines with content
+              line.append("td") //Name Cell
+                .text(d => d["location"])
+              line.append("td") //Size Cell
+                .text(d => String(d.Percentage.toFixed(2)) + " %")
+              line.append("td") //Weight Cell
+                .text(d => String(d.total_vaccinations))
+
+              // utils
+              vect_double.push(selected_data[0]["location"])
+              max_countries = max_countries + 1
+            }
+          }
       }
     }
 
@@ -457,7 +576,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
         function go_back_to_continent(){
           continent_view = true
-          refresh()
+          update_dates()
         }
 
   })
