@@ -4,17 +4,20 @@ programming assignment for the VIS 2022S 05.06.22 -->
 <html lang="en">
 <meta charset="utf-8">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <link rel="stylesheet" type="text/css" href="main.css">
-  <script src="d3.min.js"></script>
-  <script src="jquery-3.6.0.min.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <script src="d3.min.js"></script>
+    <script src="jquery-3.6.0.min.js"></script>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy" crossorigin="anonymous"></script>
 
+    <link href='bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' rel='stylesheet' type='text/css'>
+    <script src='bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.17/js/bootstrap-select.min.js"></script>
   <title> A5 assignment visualization </title>
 </head>
 <body style="background-color:#e8e2e1;">
@@ -25,25 +28,25 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
 <div class=class="container-fluid" id="big_container_1">
     <div class="row align-items-center" style="background-color:#969892;">
-        <div class="row justify-content-sm-center" style="background-color:#e8e2e1;" >
-            <div class="col-md-auto" >
-          <label for="start">Start date:</label>
-          <input type="date" id="date_start" name="start_time"
-                 value="2020-03-01"
-                 min="2020-01-01" max="2022-12-30"
-                 onchange="get_start_dates()">
-        </div>
-            <div class="col-md-auto" >
-          <label for="start">End date:</label>
+      <div class="row justify-content-sm-center" style="background-color:#e8e2e1;" >
+          <div class="col-md-auto" >
+        <label for="start">Start date:</label>
+        <input type="date" id="date_start" name="start_time"
+               value="2020-03-01"
+               min="2020-01-01" max="2022-12-30"
+               onchange="get_start_dates()">
+      </div>
+          <div class="col-md-auto" >
+        <label for="start">End date:</label>
 
-          <input type="date" id="date_end" name="end_time"
-                 value="2021-03-01"
-                 min="2020-01-02" max="2022-12-31">
-        </div>
-            <div class="col-md-auto">
-                <button type="button" class="btn btn-sm btn-block h-100 btn-outline-primary" data-toggle="modal" id="compare_button" sleepTime=100>Compare</button>
-        </div>
-        </div>
+        <input type="date" id="date_end" name="end_time"
+               value="2021-03-01"
+               min="2020-01-02" max="2022-12-31">
+      </div>
+          <div class="col-md-auto">
+              <button type="button" class="btn btn-sm btn-block h-100 btn-outline-primary" data-toggle="modal" id="compare_button" sleepTime=100>Compare</button>
+      </div>
+      </div>
 
     </div>
 
@@ -57,9 +60,26 @@ programming assignment for the VIS 2022S 05.06.22 -->
     </div>
 </div>
 
-<svg class=class="container-fluid" id="big_container_2">
+<div class=class="container-fluid" id="big_container_2">
+  <div class="row justify-content-sm-center" style="background-color:#e8e2e1;" >
+      <div class="col-md-auto" id="date1"></div>
+      <div class="col-md-auto" id="date2"></div>
+      <div class="col-md-auto" id="back"></div>
+  </div>
 
-</svg>
+  <div class="row">
+      <svg class="col-lg-6" style="background-color:#e8e2e1;" id="vis1"></svg>
+      <div class="col-lg-6" style="background-color:#e8e2e1;">
+        <div id="selector_space_vis_2"></div>
+        <div class="col-lg-6" id="vis2"></div>
+      </div>
+  </div>
+
+  <div class="row">
+      <div class="col-lg-6" style="background-color:#e8e2e1;" id="vis3"></div>
+      <div class="col-lg-6" style="background-color:#e8e2e1;" id="vis4"></div>
+  </div>
+</div>
 
 
 
@@ -75,13 +95,14 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
       // date management
       var day_end, day_start, month_end, month_start, year_end, year_start;
-      var data_start, data_end, data_table;
+      var data_start, data_end, data_table, date_start_whole, date_end_whole;
       // table management
       var table, vect_double;
       var active_continent, my_active_data;
       var max_countries
       // plot management
       var continent_view, go_to_second_view, second_view_data;
+      var features_vis_2, click;
 
       // preprocessing
       continet_data = continet_data.filter(
@@ -104,7 +125,16 @@ programming assignment for the VIS 2022S 05.06.22 -->
         d.day = +d["day"];
         d.Percentage = +d["Percentage"];
         d.Percentage_vaccines = +d["Percentage_vaccines"];
+        d.total_cases = +d["total_cases"];
+        d.new_cases = +d["new_cases"];
+        d.total_vaccinations = +d["total_vaccinations"];
+        d.total_tests = +d["total_tests"];
+        d.new_tests = +d["new_tests"];
+        d.population = +d["population"];
+        d.people_vaccinated = +d["people_vaccinated"];
       })
+
+      features_vis_2 = ["total_cases", "new_cases", "total_vaccinations", "total_tests", "new_tests", "Percentage", "Percentage_vaccines", "people_vaccinated"]
 
       function first_view(){
         vect_double = []
@@ -128,6 +158,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
       // acquire dates
       function get_start_dates() {
         date_start=$('#date_start').val().split('-');
+        date_start_whole = $('#date_start').val();
         day_start=+date_start[2];
         month_start=+date_start[1];
         year_start=+date_start[0];
@@ -141,6 +172,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
       function get_end_dates() {
         date_end=$('#date_end').val().split('-');
+        date_end_whole = $('#date_end').val();
         day_end=+date_end[2];
         month_end=+date_end[1];
         year_end=+date_end[0];
@@ -224,12 +256,12 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .attr("width", x.bandwidth())
             .attr('id', function(d) { return d.continent})
             .attr("height", function(d) { return height - y(d.Percentage); })
-            .attr("fill", "#f05d98")
+            .attr("fill", "#b54a63")
             .on("mouseover", function() {
-                d3.select(this).style("fill", "#bf303d");
+                d3.select(this).style("fill", "#9b88db");
               })
             .on("mouseout", function() {
-                d3.select(this).style("fill", "#f05d98");
+                d3.select(this).style("fill", "#b54a63");
               })
             .on("click", continent_to_countries)
 
@@ -320,12 +352,12 @@ programming assignment for the VIS 2022S 05.06.22 -->
               .attr("width", x.bandwidth())
               .attr('id', function(d) { return d.location})
               .attr("height", function(d) { return height - y(d.Percentage); })
-              .attr("fill", "#f05d98")
+              .attr("fill", "#b54a63")
               .on("mouseover", function() {
-                  d3.select(this).style("fill", "#bf303d");
+                  d3.select(this).style("fill", "#9b88db");
                 })
               .on("mouseout", function() {
-                  d3.select(this).style("fill", "#f05d98");
+                  d3.select(this).style("fill", "#b54a63");
                 })
               .on("click", add_country)
 
@@ -389,13 +421,12 @@ programming assignment for the VIS 2022S 05.06.22 -->
       function print_barplot_2() {
         console.log(second_view_data);
         // set the dimensions and margins of the graph
-        var margin = {top: 100, right: 100, bottom: 200, left: 100},
-            width = 1000 - margin.left - margin.right,
-            height = 800 - margin.top - margin.bottom;
+        var margin = {top: 100, right: 50, bottom: 50, left: 100},
+            width = 900 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
 
         // append the svg object to the body of the page
-        console.log("YOLOYOLYOYLYOYLYOYLYOLYOYLYOYLYO");
-        var svg = d3.select("#big_container_2")
+        var svg = d3.select("#vis1")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
           .append("g")
@@ -407,7 +438,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
         // X axis
         var x = d3.scaleBand()
           .range([ 0, width - margin.left])
-          .domain(second_view_data.map(function(d) { return d.location; }))
+          .domain(second_view_data.map(function(d) { return d.iso_code; }))
           .padding(0.2);
 
         var rectangle = svg.append("rect")
@@ -447,17 +478,17 @@ programming assignment for the VIS 2022S 05.06.22 -->
           .enter()
           .append("rect")
             .attr('class', 'barplot')
-            .attr("x", function(d) { return x(d.location); })
+            .attr("x", function(d) { return x(d.iso_code); })
             .attr("y", function(d) { return y(d.Percentage_vaccines);})
             .attr("width", x.bandwidth())
             .attr('id', function(d) { return d.location})
             .attr("height", function(d) { return height - y(d.Percentage_vaccines); })
-            .attr("fill", "#f05d98")
+            .attr("fill", "#b54a63")
             .on("mouseover", function() {
-                d3.select(this).style("fill", "#bf303d");
+                d3.select(this).style("fill", "#9b88db");
               })
             .on("mouseout", function() {
-                d3.select(this).style("fill", "#f05d98");
+                d3.select(this).style("fill", "#b54a63");
               })
 
             svg.append("text")
@@ -467,9 +498,9 @@ programming assignment for the VIS 2022S 05.06.22 -->
                 .attr("y", 6)
                 .attr("dy", "-3em")
                 .attr("x", 30)
-                .attr("dx", "-11em")
+                .attr("dx", "-3.5em")
                 .attr("transform", "rotate(-90)")
-                .text("Percentage of vaccinations")
+                .text("Vaccinations/population (%)")
                 .style("font-weight","bold");
 
             svg.append("text")
@@ -480,6 +511,177 @@ programming assignment for the VIS 2022S 05.06.22 -->
                 .attr('text-anchor', 'middle')
                 .style("font-weight","bold");
         }
+
+      function update_vis_2(){
+         // filter the data
+         var startDate = new Date(date_start_whole);
+         var endDate = new Date(date_end_whole);
+         var intermed = countries_data.filter(d => {
+                var date = new Date(d["complete_dates"]);
+                return (date >= startDate && date <= endDate);
+          });
+         var data_vis_2 = intermed.filter(d => vect_double.includes(d["location"]))
+
+         // get the chosen feature
+         var e = document.getElementById("my_select_vis_2");
+         var active_feature_2 = e.value;
+
+        // filter the data
+        var active_data_2 = data_vis_2.map(function(d) {return {
+                active_feature_2: d[active_feature_2]
+              }})
+        let svg = d3.select("#vis2");
+        let diagram_vis_2 = svg.append("g").attr("id", "diagram_vis_2_vis_2");
+        click = false;
+
+        // LABELS
+        svg.append("text")
+          .text(active_feature_2)
+          .attr('x', '25')
+          .attr('y', '230')
+          .style("writing-mode", "vertical-lr")
+          .style("font-weight","bold");
+
+          let oldMax = d3.max(active_data_2.map(d => d.active_feature_2))
+
+          
+          let scale_Y = d3.scaleLinear()
+            .domain([oldMax, 0])
+            .range([0, 500]);
+
+          let x_axis = d3.axisBottom(x_scale)
+                   .tickValues(x_scale.domain()
+                   .filter(function(d,i){ return !(i%Math.round(no_days/10))}));
+
+            let line = d3.line()
+              .x(function(d) {
+                return scale_X(d.year);
+              })
+              .y(function(d) {
+                return scale_Y(d.circulation);
+              });
+
+            // create the axis and vertical lines
+            let axis_X = d3.axisBottom();
+            let axis_Y = d3.axisLeft();
+
+            axis_X.scale(scale_X)
+            .ticks(5)
+            .tickFormat((d, i) => d.toString());
+
+            axis_Y.scale(scale_Y)
+            .ticks(10)
+            .tickFormat((d, i) => d.toString())
+
+            // append the features
+
+            diagram_vis_2.append("g").call(axis_X)
+                .attr("transform", "translate(100,550)")
+
+            diagram_vis_2.append("g").call(axis_Y)
+                .attr("transform", "translate(100,50)")
+
+            // Ordinal color map
+            let myColours = [
+               "#743224",
+               "#900C3F",
+               "#C70039",
+               "#E25167",
+               "#CA4571",
+               "#D06A95",
+               "#E1789B",
+               "#F69EBB"];
+
+
+            diagram_vis_2.selectAll("plottedLines")
+              .data(dataByNews)
+              .enter()
+              .append("path")
+              .style("stroke", "grey")
+              .style("stroke-width", "3")
+              .attr("transform", "translate(100,50)")
+              .attr("d", d => line(d[1]))
+              .attr("fill", "none")
+              .attr("id", "line")
+              .on("mouseover", add_name)
+              .on("mouseout", delete_name)
+              .on("click", new_click)
+
+          // interaction
+          function add_name(event, d){
+            d3.select(this)
+              .style("stroke", "red")
+              .style('stroke-width', "5")
+            diagram_vis_2.append("text")
+              .text(d[0]) // the key is the name of the newspaper
+              .attr("x", event["clientX"] - 50)
+              .attr("y", event["clientY"] - 215)
+              .attr("fill", "red")
+              .attr("id", "NewsName")
+          }
+
+          function delete_name(event, d) {
+            d3.select("#NewsName").remove();
+
+            d3.select(this)
+              .style("stroke", "grey")
+              .style('stroke-width', "3")
+          }
+
+          function new_click (event, d) {
+            d3.select(this)
+              .clone()
+              .style("stroke", "pink")
+              .style('stroke-width', "5")
+              .on("click", remove_highlight)
+
+            diagram_vis_2.append("text")
+              .text(d[0]) // the key is the name of the newspaper
+              .attr("x", event["clientX"] - 50)
+              .attr("y", event["clientY"] - 180)
+              .attr("fill", "#6D1C2A")
+              .attr("class","line_".concat(d[0].replace(/\s/g, '')));
+            }
+
+          function remove_highlight (event, d) {
+            diagram_vis_2.select("text.line_".concat(d[0].replace(/\s/g, ''))).remove();
+            d3.select(this).remove();
+          }
+
+        })
+
+
+
+
+
+
+
+
+
+
+
+
+
+      }
+
+      function print_lineplot_2(){
+        // create the selector
+        var myParent = document.getElementById("selector_space_vis_2");
+        var selectList = document.createElement("select");
+        selectList.id = "my_select_vis_2";
+        // selectList.classList.add('selectpicker');
+        myParent.appendChild(selectList);
+
+        for (var i = 0; i < features_vis_2.length; i++) {
+          // add the feature selector
+          var option = document.createElement("option");
+          option.value = features_vis_2[i];
+          option.text = features_vis_2[i];
+          selectList.appendChild(option);
+        }
+
+        update_vis_2();
+      }
 
       function add_country(){
           if (first_click) {
@@ -599,13 +801,21 @@ programming assignment for the VIS 2022S 05.06.22 -->
             $("#compare_button").click(function (){
                 var sleepTime =$(this).attr('sleepTime');
                 setTimeout(function() {
-                    d3.selectAll("#big_container_1").remove();
-                    // get the data
-                    let add_end = countries_data.filter(d => day_end == d.day  &&
-                                                               month_end == d.month   &&
-                                                               year_end == d.year)
-                    second_view_data = add_end.filter(d => vect_double.includes(d["location"]))
-                    print_barplot_2();
+                    d3.selectAll("#choosing_barplot").remove();
+                    d3.selectAll("#choosing_table").remove();
+
+                    if (vect_double.length > 0) {
+                      // get the data
+                      let add_end = countries_data.filter(d => day_end == d.day  &&
+                                                                 month_end == d.month   &&
+                                                                 year_end == d.year)
+                      second_view_data = add_end.filter(d => vect_double.includes(d["location"]))
+                      print_barplot_2();
+                      print_lineplot_2();
+                    } else {
+                        document.write("Please select at least a country.");
+                    }
+
 
                 }, sleepTime);
             });
