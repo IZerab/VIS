@@ -101,20 +101,10 @@ programming assignment for the VIS 2022S 05.06.22 -->
       // plot management
       var continent_view, go_to_second_view, second_view_data;
       var features_vis_2, click;
-      var myColours;
+      var myColours, second_view_flag;
 
       // Ordinal color map
-      myColours = [
-         "#743224",
-         "#900C3F",
-         "#C70039",
-         "#E25167",
-         "#CA4571",
-         "#D06A95",
-         "#E1789B",
-         "#F69EBB",
-         "#7bf542",
-         "#4978de"];
+      myColours = [ "#eacfac", "#b4b4ca", "#504048", "#eacfac", "#b4b4ca", "#504048", "#623122", "#be6043", "#a9594b", "#de4065"];
 
       // preprocessing
       continet_data = continet_data.filter(
@@ -181,6 +171,10 @@ programming assignment for the VIS 2022S 05.06.22 -->
                                   year_start == d.year )
 
         data_table = [data_start, data_end]
+        if (second_view_flag == true){
+          update_vis_2();
+          print_barplot_2();
+        }
         update_dates();
       }
 
@@ -196,6 +190,10 @@ programming assignment for the VIS 2022S 05.06.22 -->
                                   year_end == d.year )
 
         data_table = [data_start, data_end]
+        if (second_view_flag == true){
+          update_vis_2();
+          print_barplot_2();
+        }
         update_dates();
       }
 
@@ -433,6 +431,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
         }
 
       function print_barplot_2() {
+        d3.selectAll("#to_be_deleted_3").remove();
         // set the dimensions and margins of the graph
         var margin = {top: 100, right: 50, bottom: 50, left: 100},
             width = 900 - margin.left - margin.right,
@@ -447,7 +446,8 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .attr("transform",
                   "translate(" + margin.left + "," + margin.top + ")");
 
-
+        const color = d3.scaleOrdinal()
+          .range(myColours)
         // X axis
         var x = d3.scaleBand()
           .range([ 0, width - margin.left])
@@ -496,12 +496,12 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .attr("width", x.bandwidth())
             .attr('id', function(d) { return d.location})
             .attr("height", function(d) { return height - y(d.Percentage_vaccines); })
-            .attr("fill", "#b54a63")
+            .attr("fill", function(d){ return color(d.location) })
             .on("mouseover", function() {
                 d3.select(this).style("fill", "#9b88db");
               })
             .on("mouseout", function() {
-                d3.select(this).style("fill", "#b54a63");
+                d3.select(this).style("fill", function(d){ return color(d.location) });
               })
 
             svg.append("text")
@@ -586,12 +586,17 @@ programming assignment for the VIS 2022S 05.06.22 -->
               width = 700 - margin.left - margin.right,
               height = 400 - margin.top - margin.bottom;
 
+          // remove old vis2
+          d3.selectAll("#lineplot_vis2").remove();
+
           // append the svg object to the body of the page
           const svg = d3.select("#vis2")
             .append("svg")
+              .attr('id', 'lineplot_vis2')
               .attr("width", width + margin.left + margin.right)
               .attr("height", height + margin.top + margin.bottom)
             .append("g")
+              .attr('id', 'lineplot_vis2')
               .attr("transform", `translate(${margin.left},${margin.top})`);
 
           // group the data: I want to draw one line per group
@@ -604,6 +609,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .range([0, width]);
 
           svg.append("g")
+              .attr('id', 'lineplot_vis2')
               .attr("transform", `translate(0, ${height})`)
               .classed('x axis', true)
               .call(d3.axisBottom(x).ticks(9));
@@ -614,18 +620,20 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .range([ height, 0 ]);
 
           svg.append("g")
+            .attr('id', 'lineplot_vis2')
             .call(d3.axisLeft(y))
 
           const color = d3.scaleOrdinal()
-            .range(['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33',"#348feb", "#33632f", '#a65628','#f781bf','#999999'])
+            .range(myColours)
 
             // Draw the line
             svg.selectAll(".line")
                 .data(sumstat)
                 .join("path")
+                    .attr('id', 'lineplot_vis2')
                     .attr("fill", "none")
                     .attr("stroke", function(d){ return color(d[0]) })
-                    .attr("stroke-width", 1.5)
+                    .attr("stroke-width", 2.5)
                     .attr("d", function(d){
                         return d3.line()
                             .x(function(d) { return x(new Date(d["complete_dates"])); })
@@ -636,362 +644,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
 
 
-    }
-
-
-/*
-
-
-
-         // group the data: I want to draw one line per group
-           var sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
-             .key(function(d) { return d.location;})
-             .entries(data_vis_2);
-
-           // Add X axis --> it is a date format
-           var x = d3.scaleTime()
-             .domain([startDate, endDate])
-             .range([0, width]);
-
-
-
-           // Add Y axis
-           var y = d3.scaleLinear()
-             .domain([0, oldMax])
-             .range([ height, 0 ]);
-           svg.append("g")
-             .call(d3.axisLeft(y));
-
-           // color palette
-           var res = sumstat.map(function(d){return d.key }) // list of group names
-           var color = d3.scaleOrdinal()
-             .domain(res)
-             .range(['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33',"#348feb", "#33632f", '#a65628','#f781bf','#999999'])
-
-           // Draw the line
-           svg.selectAll(".line")
-               .data(sumstat)
-               .enter()
-               .append("path")
-                 .attr("fill", "none")
-                 .attr("stroke", function(d){ return color(d.key) })
-                 .attr("stroke-width", 1.5)
-                 .attr("d", function(d){
-                   return d3.line()
-                     .x(function(d) { return x(d.complete_dates); })
-                     .y(function(d) { return y(+d["active_feature_2"]); })
-                     (d.values)
-                 })
-
-         }
-
-
-
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-         // filter the data
-         var active_data_2 = data_vis_2.map(function(d) {return {
-             active_feature_2: d[active_feature_2],
-             complete_dates: d["complete_dates"],
-             location: d["location"]
-          }})
-
-         const map = new Map(active_data_2.map(({location}) => [location, { location }]));
-         active_data_2.forEach((d, i) => map.get(d.location)[d.complete_dates] = d.active_feature_2);
-         data_vis_2 = [...map.values()];
-
-         let newData = [];
-         data_vis_2.forEach(element => {
-            let newsName = element.location;
-            delete element.location;
-
-            Object.entries(element).forEach(
-                ([key, value], i) => newData.push({
-                    location: location,
-                    complete_dates: key,
-                    active_feature_2: +value
-             })
-           );
-         });
-
-         //The we group then by name:
-         let dataByLocation = d3.group(newData, d => d.location);
-         dataByLocation = dataByLocation
-         console.log(dataByLocation);
-         let dataMax = Array.from(newData);
-
-         let oldMax = 0;
-         // get the maximum Circulation
-         for (var i = 0; i < dataMax.length; i++) {
-            var my_max = dataMax[i]["active_feature_2"];
-            if (my_max > oldMax) {
-                oldMax = my_max;
-           }
-         }
-
-        var w = 800;
-        var h = 450;
-        var margin = {top: 30, bottom: 40, left: 50, right: 20, }
-        var width = w - margin.left - margin.right
-        var height = h - margin.top - margin.bottom
-
-        var svg = d3.select('#vis2').append('svg')
-            .attr('class', 'chart')
-            .attr('width', w)
-            .attr('height', h)
-            .attr("id", "diagram_vis_2");
-
-        click = false;
-        var diagram = svg.append('g')
-            .classed('graph', true)
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-        let scale_X = d3.scaleTime()
-          .domain([startDate, endDate])
-          .range([0, width]);
-
-        let scale_Y = d3.scaleLinear()
-          .domain([oldMax, 0])
-          .range([0, height]);
-
-        let line = d3.line()
-          .x(d => scale_X(d["complete_dates"]))
-          .y(d => scale_Y(d["active_feature_2"]))
-
-        diagram.append('g')
-            .classed('x axis', true)
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(scale_X)
-              .ticks(10));
-
-        diagram.append('g')
-            .classed('y axis', true)
-            .call(d3.axisLeft(scale_Y)
-              .ticks(10));
-
-*/
-        /*
-        // create the axis and vertical lines
-        let axis_X = d3.axisBottom();
-        let axis_Y = d3.axisLeft();
-
-        axis_X.scale(scale_X)
-        .ticks(10)
-        .tickFormat((d, i) => d.toString());
-
-        axis_Y.scale(scale_Y)
-        .ticks(10)
-        .tickFormat((d, i) => d.toString())
-
-        diagram.append("g").call(axis_X)
-            .attr("transform", "translate(100,550)")
-
-        diagram.append("g").call(axis_Y)
-            .attr("transform", "translate(100,50)")
-        */
-
-        // diagram.selectAll("plottedLines")
-        //   .append("path")
-        //   .datum(data_vis_2)
-        //   .style("stroke", "grey")
-        //   .style("stroke-width", "3")
-        //   .attr("d", line)
-          //.attr("transform", "translate(100,50)")
-          // .attr("fill", "none")
-          // .attr("id", "line")
-
-            /*
-
-        diagram.selectAll("plottedLines")
-          .data(dataByLocation)
-          .enter()
-          .append("path")
-          .style("stroke", "grey")
-          .style("stroke-width", "3")
-          .attr("transform", "translate(100,50)")
-          .attr("d", d => line(d[0]))
-          .attr("fill", "none")
-          .attr("id", "line")
-
-          */
-
-
-
-              /*
-        chart.selectAll(".line")
-             .data(dataByLocation)
-             .enter()
-             .append("path")
-               .attr("fill", "none")
-               .attr("stroke-width", 1.5)
-               .attr("d", function(d){
-                 return d3.line()
-                   .x(function(d) { return x(d.complete_dates); })
-                   .y(function(d) { return y(d["active_feature_2"]); })
-                   (d.values)
-               })
-               */
-          //     .attr("stroke", function(d){ return color(d.key) })
-
-
-
-        /*
-
-        // LABELS
-        svg.append("text")
-          .text(active_feature_2)
-          .attr('x', '25')
-          .attr('y', '230')
-          .style("writing-mode", "vertical-lr")
-          .style("font-weight","bold");
-
-
-          console.log(oldMax);
-
-          var scale_X = d3.scaleTime()
-              .domain([startDate, endDate])
-              .range([0, 500]);
-
-          let scale_Y = d3.scaleLinear()
-              .domain([oldMax, 0])
-              .range([0, 500]);
-
-          let line = d3.line()
-            .x(function(d) {
-              return scale_X(d.complete_dates);
-            })
-            .y(function(d) {
-              return scale_Y(d[active_feature_2]);
-            });
-
-          // create the axis and vertical lines
-          let axis_X = d3.axisBottom();
-          let axis_Y = d3.axisLeft();
-
-          axis_X.scale(scale_X)
-          .ticks(7)
-          .tickFormat(data.map(function(d) { return new Date(d.complete_dates)}) );
-
-          axis_Y.scale(scale_Y)
-          .ticks(10)
-          .tickFormat((d, i) => d.toString())
-
-          // append the features
-
-          diagram_vis_2.append("g").call(axis_X)
-              .attr("transform", "translate(100,550)")
-
-          diagram_vis_2.append("g").call(axis_Y)
-              .attr("transform", "translate(100,50)")
-
-          diagram_vis_2.selectAll("plottedLines")
-            .data(active_data_2)
-            .enter()
-            .append("path")
-            .style("stroke", "grey")
-            .style("stroke-width", "3")
-            .attr("transform", "translate(100,50)")
-            .attr("fill", "none")
-            .attr("id", "line")
-            .on("mouseover", add_name)
-            .on("mouseout", delete_name)
-            .on("click", new_click)
-      //      .attr("d", d => line(d[1]))
-
-        // interaction
-        function add_name(event, d){
-          d3.select(this)
-            .style("stroke", "red")
-            .style('stroke-width', "5")
-          diagram_vis_2.append("text")
-            .text(d.location)
-            .attr("x", event["clientX"])
-            .attr("y", event["clientY"])
-            .attr("fill", "red")
-            .attr("id", "name_country")
-        }
-
-        function delete_name(event, d) {
-          d3.select("#name_country").remove();
-
-          d3.select(this)
-            .style("stroke", "grey")
-            .style('stroke-width', "3")
-        }
-
-        function new_click (event, d) {
-          d3.select(this)
-            .clone()
-            .style("stroke", "pink")
-            .style('stroke-width', "5")
-            .on("click", remove_highlight)
-
-          diagram_vis_2.append("text")
-            .text(d[0]) // the key is the name of the newspaper
-            .attr("x", event["clientX"] - 50)
-            .attr("y", event["clientY"] - 180)
-            .attr("fill", "#6D1C2A")
-            .attr("class","line_".concat(d.location.replace(" ", '')));
-          }
-
-        function remove_highlight (event, d) {
-          diagram_vis_2.select("text.line_".concat(d.location.replace(" ", ''))).remove();
-          d3.select(this).remove();
-        }
-
-        */
-
-
-    //  }
+                  }
 
       function print_lineplot_2(){
         // create the selector
@@ -1008,6 +661,8 @@ programming assignment for the VIS 2022S 05.06.22 -->
           option.text = features_vis_2[i];
           selectList.appendChild(option);
         }
+
+        myParent.oninput = update_vis_2;
 
         update_vis_2();
       }
@@ -1128,6 +783,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
       // button function
       $(document).ready(function () {
             $("#compare_button").click(function (){
+                second_view_flag = true
                 var sleepTime =$(this).attr('sleepTime');
                 setTimeout(function() {
                     d3.selectAll("#choosing_barplot").remove();
