@@ -74,11 +74,11 @@ programming assignment for the VIS 2022S 05.06.22 -->
   </div>
 
   <div class="row">
-      <div class="col-lg-6" style="background-color:#e8e2e1;">
-        <div id="selector_space_vis_3"></div>
-        <div class="col-lg-6" id="vis3"></div>
-      </div>
       <div class="col-lg-6" style="background-color:#e8e2e1;" id="vis4"></div>
+      <div class="col-lg-6" style="background-color:#e8e2e1;">
+        <div id="selector_space_vis_3" ></div>
+        <svg class="row-lg-6" id="vis3" onmousemove="getPos(event)" onmouseout="stopTracking()"></svg>
+      </div>
   </div>
 </div>
 
@@ -576,7 +576,6 @@ programming assignment for the VIS 2022S 05.06.22 -->
          //The we group then by name:
          let dataByLocation = d3.group(newData, d => d.location);
          dataByLocation = dataByLocation
-         console.log(dataByLocation);
          let dataMax = Array.from(newData);
 
          let oldMax = 0;
@@ -609,7 +608,6 @@ programming assignment for the VIS 2022S 05.06.22 -->
           // group the data: I want to draw one line per group
           const sumstat = d3.group(data_to_be_grouped_2, d => d["location"]);
 
-          console.log(sumstat);
 
           const x = d3.scaleTime()
             .domain([startDate, endDate])
@@ -793,16 +791,30 @@ programming assignment for the VIS 2022S 05.06.22 -->
                                                    month_end == d.month   &&
                                                    year_end == d.year)
 
+
         var data_vis_3 = intermed.filter(d => vect_double.includes(d["location"]))
+        var geodata_3 = geodata.features.filter(d => vect_double.includes(d.properties.name))
 
         // get the chosen feature
         var e = document.getElementById("my_select_vis_3");
         var active_feature_3 = e.value;
 
         // create the canvas
-        let svg = d3.select("#vis3");
-        let mapArea = svg.append("g")
-            .attr('transform', "translate(30, 30)");
+        // set the dimensions and margins of the graph
+        var margin = {top: 0, right: 0, bottom: 0, left: 100},
+            width = 700 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        var svg = d3.select("#vis3")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+              .attr('id', "to_be_deleted_3")
+              .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")")
+        var mapArea = svg.append("g")
+            .attr('fill', 'darkgrey');
 
         // preprocessing
         data_vis_3.forEach(d => {
@@ -811,22 +823,16 @@ programming assignment for the VIS 2022S 05.06.22 -->
             }
         })
 
-        console.log();
 
         // get a scale for the colour to get max constrast
         let colour_scale_3 = d3.scaleLinear()
             .domain(d3.extent(data_vis_3.map(a => a[active_feature_3])))
-            .range([0.9, 0.15]);
+            .range([0.15, 0.50]);
 
 
-        const projection = d3.geoEquirectangular().scale(90);
+        const projection = d3.geoMercator().scale(90).translate([200, 315]);
         const my_path = d3.geoPath(projection);
 
-        mapArea.selectAll("path")
-          .data(geodata.features)
-          .enter()
-          .append("path")
-          .attr("d", my_path)
 
         e.oninput = function() {
           first_click = true
@@ -834,42 +840,54 @@ programming assignment for the VIS 2022S 05.06.22 -->
         // create a new map
         let map = mapArea.selectAll("path")
           .data(geodata.features)
-          .enter()
-          .append('path')
-          .attr('d', my_path)
-          .attr('stroke', 'darkgrey')
-          .attr('stroke-width', 0.5)
-          .attr("transform", "scale(0.8)");
+          .join("path")
+          .attr("d", d3.geoPath().projection(projection))
+
 
         // fill the countries with different colours
         mapArea.selectAll("path")
-            .data(data_vis_3)
-            .attr('fill', d => colour_generator_3(d[active_feature_3], colour_scale_3))
-            .attr('id', d => d["location"])
+            // .data(intermed)
+            .attr('fill', d => colour_generator_3(intermed,d))
+            .attr('id', d => d.properties.name)
+
+       mapArea.selectAll("path")
             .on("mouseover", function() {
                 d3.select(this)
                   .attr("fill", "powderblue")
-                mapArea.append("text")
-                  .text(this.id)
-                  .attr("x", d3.pointer(event, svg.node())[0])
-                  .attr("y", d3.pointer(event, svg.node())[1])
-                  .attr('id', 'flag')
-                  .style("font-weight","bold")
-                  .style("font-size","20")
-                  .attr("fill", "black");
-              })
+      mapArea.append("text")
+        .text(this.id)
+        .attr("x", $("#vis3").data("value")[0] -850)
+        .attr("y", $("#vis3").data("value")[1] -300)
+        .attr('id', 'flag')
+        .style("font-weight","bold")
+        .style("font-size","20")
+        .attr("fill", "black");
+      })
+      .on('mousemove',
+          function(d,id) {})
 
-              .on("mouseout", function() {
-                  d3.select(this)
-                    .attr("fill", d => colour_generator_3(d.HS, colour_scale_3));
-                  d3.select("#flag").remove();
-              })
+      .on("mouseout", function() {
+          d3.select(this)
+            .attr("fill", d => {
+              colour_generator_3(intermed, d)});
+          d3.select("#flag").remove();
+      })
 
 
 
               // function that assigns a colour to each state
-              function colour_generator_3(d, colour_scale) {
-                return d3.hsl(10, 0.7, colour_scale(d))
+              function colour_generator_3(intermed, d) {
+                if (vect_double.includes(d.properties.name)){
+                    let temp = intermed.filter(o => d.properties.name == o["location"] )
+                    var res = colour_scale_3(temp[0][active_feature_3])
+
+
+                } else {
+                    var res = 0
+
+
+                }
+                return d3.hsl(10, 0.7, res)
           }
 
         }
@@ -931,11 +949,13 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
       var first_click = true
 
+      function getPos(e){
+      		x=e.clientX;
+      		y=e.clientY;
+      		$("#vis3").data("value", [x, y])
+    	}
 
-    // function that assigns a colour to each state
-    function colour_generator_BA(d, colour_scale) {
-      return d3.hsl(11, 0.7, colour_scale(d))
-    }
+      function stopTracking(){}
 
 
 </script>
