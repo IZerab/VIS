@@ -68,20 +68,20 @@ programming assignment for the VIS 2022S 05.06.22 -->
   <div class="row">
       <svg class="col-lg-6" style="background-color:#e8e2e1;" id="vis1"></svg>
       <div class="col-lg-6" style="background-color:#e8e2e1;">
-        <div id="selector_space_vis_2"></div>
+        <div class="dropdown" id="selector_space_vis_2"></div>
         <div class="col-lg-6" id="vis2"></div>
       </div>
   </div>
 
   <div class="row">
     <div class="col-lg-6" style="background-color:#e8e2e1;">
-      <div id="selector_space_vis_4_1" ></div>
-      <div id="selector_space_vis_4_2" ></div>
-      <div id="selector_space_vis_4_3" ></div>
+      <div class="dropdown" id="selector_space_vis_4_1" ></div>
+      <div class="dropdown" id="selector_space_vis_4_2" ></div>
+      <div class="dropdown" id="selector_space_vis_4_3" ></div>
       <div class="row-lg-6" id="vis4"></div>
     </div>
     <div class="col-lg-6" style="background-color:#e8e2e1;">
-      <div id="selector_space_vis_3" ></div>
+      <div class="dropdown" id="selector_space_vis_3" ></div>
       <svg class="row-lg-6" id="vis3" onmousemove="getPos(event)" onmouseout="stopTracking()"></svg>
     </div>
 
@@ -188,6 +188,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
           update_vis_2();
           print_barplot_2();
           update_vis_3();
+          update_bubble();
         }
         update_dates();
       }
@@ -208,6 +209,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
           update_vis_2();
           print_barplot_2();
           update_vis_3();
+          update_bubble();
           let add_end = countries_data.filter(d => day_end == d.day  &&
                                                      month_end == d.month   &&
                                                      year_end == d.year)
@@ -222,7 +224,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
         // set the dimensions and margins of the graph
         var margin = {top: 100, right: 100, bottom: 200, left: 100},
-            width = 1000 - margin.left - margin.right,
+            width = 900 - margin.left - margin.right,
             height = 800 - margin.top - margin.bottom;
 
         // append the svg object to the body of the page
@@ -319,7 +321,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
       function print_barplot_countries(active_data) {
         // set the dimensions and margins of the graph
         var margin = {top: 100, right: 100, bottom: 200, left: 100},
-            width = 1000 - margin.left - margin.right,
+            width = 900 - margin.left - margin.right,
             height = 800 - margin.top - margin.bottom;
 
         // append the svg object to the body of the page
@@ -706,7 +708,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
                   table.update();
                   max_countries = max_countries - 1
             } else {
-                if (max_countries < 10) {
+                if (max_countries < 20) {
                 // data
                 vect_double.push(this.id)
                 table.update();
@@ -894,6 +896,16 @@ programming assignment for the VIS 2022S 05.06.22 -->
                     return d3.hsl(10, 0.7, res)
               }
 
+        let zoom = d3.zoom()
+            .scaleExtent([1, 8])
+            .on('zoom', function(event) {
+                d3.select("#vis3")
+                  .selectAll('path')
+                  .attr('transform', event.transform);
+          });
+
+       d3.select("#vis3").call(zoom);
+
             }
 
           e.oninput();}
@@ -1040,61 +1052,35 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .on("mouseleave", hideTooltip )
 
 
+        svg.append("g")
+            .attr('class', 'brush')
+            .call(d3.brush()
+              .extent([[0,0], [width,height]])
+              .on("end", updateChart)
+            )
 
+        function updateChart(event) {
+          let extent = event.selection
+          if (!extent) {
+            if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+            var x = d3.scaleLinear()
+              .domain([my_min_4_1 - my_max_4_3, my_max_4_3 + my_max_4_1])
+            var y = d3.scaleLinear()
+                        .domain([my_min_4_2 - my_max_4_3, my_max_4_3 + my_max_4_2])
+            var z = d3.scaleLinear()
+                        .domain([my_min_4_3, my_max_4_3])
+          } else {
+            x.domain([x.invert(extent[0][0]), x.invert(extent[0][1])])
+            y.domain([y.invert(extent[1][0]), y.invert(extent[1][1])])
+            svg.select(".brush").call(brush.move, null) // This: Remove the grey brush area as soon as the selection has been done
+          }
 
-        // let brush = d3.brushX()
-        //     .extent([[0, 0], [width, height]])
-        //     .on("brush end", brushed);
-
-        let zoom = d3.zoom()
-            .scaleExtent([1, Infinity])
-            .translateExtent([[0, 0], [width, height]])
-            .extent([[0, 0], [width, height]])
-            .on("zoom", zoomed);
-
-        // function brushed(event) {
-        //     let datarange = [];
-        //     if (sourceEvent === "zoom") return; // ignore brush-by-zoom
-        //     sourceEvent = "brush";
-        //     let s = event.selection || x2.range();
-        //     x.domain(s.map(x2.invert, x2));
-        //     focus.select(".area").attr("d", area);
-        //     focus.select(".axis--x").call(xAxis);
-        //     svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
-        //         .scale(width / (s[1] - s[0]))
-        //         .translate(-s[0], 0));
-        //     sourceEvent = null;
-        //     shape_date = s;
-        //     x_range = x;
-        //
-        //     // min_max(shape_date,x_range,length_data)
-        //     data_map_country = data.filter(d => d.iso_code == choosen_country)
-        //     selected_min_day = data_map_country[Math.round((s[0]*length_data_map_country)/x.range()[1])]
-        //     selected_max_day = data_map_country[Math.round((s[1]*length_data_map_country)/x.range()[1])-1]
-        //     change_selected_print_date(shape_date,selected_min_day,selected_max_day)
-        //
-        //     data_map_country = data_map_country.filter(d => d.date >= selected_min_day.date && d.date <= selected_max_day.date)
-        //     vis_3_compute_plot(data_map_country,vis_3_select_column,Boolean(false))
-        //     vis_2_compute_plot(data_map_country,vis_2_select_column_1,vis_2_select_column_2,Boolean(false))
-        //     create_table(data_map_country,Boolean(false))
-        //     table_2_3(data_map_country,Boolean(false))
-        //     plot_graph_vis_4(data,data_map_country,Boolean(false))
-        // }
-
-        function zoomed(event) {
-            let datarange = [];
-            sourceEvent = "zoom";
-            let t = event.transform;
-            x.domain(t.rescaleX(x).domain());
-            focus.select(".area").attr("d", area);
-            focus.select(".axis--x").call(xAxis);
-            context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
-            sourceEvent = null;
+          axis.call(axisX)
+          diagram.selectAll("circle")
+            .attr("cx", (d, i) => scaleX(d.weight))
         }
 
 
-
-        svg.call(zoom);
 
       }
 
@@ -1155,7 +1141,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
         }
 
       myParent_4_3.oninput = update_bubble;
-
+      update_bubble();
       }
 
 
