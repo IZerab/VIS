@@ -74,11 +74,17 @@ programming assignment for the VIS 2022S 05.06.22 -->
   </div>
 
   <div class="row">
-      <div class="col-lg-6" style="background-color:#e8e2e1;" id="vis4"></div>
-      <div class="col-lg-6" style="background-color:#e8e2e1;">
-        <div id="selector_space_vis_3" ></div>
-        <svg class="row-lg-6" id="vis3" onmousemove="getPos(event)" onmouseout="stopTracking()"></svg>
-      </div>
+    <div class="col-lg-6" style="background-color:#e8e2e1;">
+      <div id="selector_space_vis_4_1" ></div>
+      <div id="selector_space_vis_4_2" ></div>
+      <div id="selector_space_vis_4_3" ></div>
+      <div class="row-lg-6" id="vis4"></div>
+    </div>
+    <div class="col-lg-6" style="background-color:#e8e2e1;">
+      <div id="selector_space_vis_3" ></div>
+      <svg class="row-lg-6" id="vis3" onmousemove="getPos(event)" onmouseout="stopTracking()"></svg>
+    </div>
+
   </div>
 </div>
 
@@ -106,7 +112,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
       // plot management
       var continent_view, go_to_second_view, second_view_data;
       var features_vis_2, click;
-      var myColours, second_view_flag;
+      var myColours, second_view_flag, data_vis_4;
 
       // Ordinal color map
       myColours = [ "#be6043", "#a9594b", "#de4065", "#eacfac", "#1f7d7a", "#0754fa", "#f50c2b", "#b4b4ca", "#504048", "#623122"];
@@ -181,6 +187,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
         if (second_view_flag == true){
           update_vis_2();
           print_barplot_2();
+          update_vis_3();
         }
         update_dates();
       }
@@ -200,6 +207,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
         if (second_view_flag == true){
           update_vis_2();
           print_barplot_2();
+          update_vis_3();
           let add_end = countries_data.filter(d => day_end == d.day  &&
                                                      month_end == d.month   &&
                                                      year_end == d.year)
@@ -788,8 +796,8 @@ programming assignment for the VIS 2022S 05.06.22 -->
       function update_vis_3(){
         // filter the data
         var intermed = health_data.filter(d => day_end == d.day           &&
-                                                   month_end == d.month   &&
-                                                   year_end == d.year)
+                                               month_end == d.month       &&
+                                               year_end == d.year)
 
 
         var data_vis_3 = intermed.filter(d => vect_double.includes(d["location"]))
@@ -854,50 +862,47 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .on("mouseover", function() {
                 d3.select(this)
                   .attr("fill", "powderblue")
-      mapArea.append("text")
-        .text(this.id)
-        .attr("x", $("#vis3").data("value")[0] -850)
-        .attr("y", $("#vis3").data("value")[1] -300)
-        .attr('id', 'flag')
-        .style("font-weight","bold")
-        .style("font-size","20")
-        .attr("fill", "black");
-      })
-      .on('mousemove',
-          function(d,id) {})
+          mapArea.append("text")
+            .text(this.id)
+            .attr("x", $("#vis3").data("value")[0] -850)
+            .attr("y", $("#vis3").data("value")[1] -300)
+            .attr('id', 'flag')
+            .style("font-weight","bold")
+            .style("font-size","20")
+            .attr("fill", "black");
+          })
+          .on('mousemove',
+              function(d,id) {})
 
-      .on("mouseout", function() {
-          d3.select(this)
-            .attr("fill", d => {
-              colour_generator_3(intermed, d)});
-          d3.select("#flag").remove();
-      })
-
+          .on("mouseout", function() {
+              d3.select(this)
+                .attr("fill", d => colour_generator_3(intermed,d));
+              d3.select("#flag").remove();
+          })
 
 
-              // function that assigns a colour to each state
-              function colour_generator_3(intermed, d) {
-                if (vect_double.includes(d.properties.name)){
-                    let temp = intermed.filter(o => d.properties.name == o["location"] )
-                    var res = colour_scale_3(temp[0][active_feature_3])
 
+                  // function that assigns a colour to each state
+                  function colour_generator_3(intermed, d) {
+                    if (vect_double.includes(d.properties.name)){
+                        let temp = intermed.filter(o => d.properties.name == o["location"] )
+                        var res = colour_scale_3(temp[0][active_feature_3])
 
-                } else {
-                    var res = 0
+                    } else {
+                        return "darkgrey"
+                    }
+                    return d3.hsl(10, 0.7, res)
+              }
 
+            }
 
-                }
-                return d3.hsl(10, 0.7, res)
-          }
-
-        }
-
-      e.oninput();}
+          e.oninput();}
 
       function print_map(){
           // create the selector
           var myParent = document.getElementById("selector_space_vis_3");
           var selectList = document.createElement("select");
+          $( "#selector_space_vis_3" ).append('<label for="name">Select the desired feature:  </label>');
           selectList.id = "my_select_vis_3";
           // selectList.classList.add('selectpicker');
           myParent.appendChild(selectList);
@@ -915,6 +920,182 @@ programming assignment for the VIS 2022S 05.06.22 -->
           update_vis_3();
         }
 
+      function update_bubble(){
+         var intermed = health_data.filter(d => day_end == d.day           &&
+                                                   month_end == d.month   &&
+                                                   year_end == d.year)
+         data_vis_4 = intermed.filter(d => vect_double.includes(d["location"]))
+
+         // get the chosen feature
+         var e_1 = document.getElementById("my_select_vis_4_1");
+         var active_feature_4_1 = e_1.value;
+
+         var e_2 = document.getElementById("my_select_vis_4_2");
+         var active_feature_4_2 = e_2.value;
+
+         var e_3 = document.getElementById("my_select_vis_4_3");
+         var active_feature_4_3 = e_3.value;
+
+
+
+        // get the maxes
+        let my_max_4_1 = d3.max(data_vis_4.map(d => d[active_feature_4_1]))
+        let my_max_4_2 = d3.max(data_vis_4.map(d => d[active_feature_4_2]))
+        let my_max_4_3 = d3.max(data_vis_4.map(d => d[active_feature_4_3]))
+
+        let my_min_4_1 = d3.min(data_vis_4.map(d => d[active_feature_4_1]))
+        let my_min_4_2 = d3.min(data_vis_4.map(d => d[active_feature_4_2]))
+        let my_min_4_3 = d3.min(data_vis_4.map(d => d[active_feature_4_3]))
+
+        var margin = {top: 0, right: 0, bottom: 50, left: 100},
+            width = 700 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        d3.select("#to_be_deleted_4").remove();
+        var svg = d3.select("#vis4")
+          .append("svg")
+            .attr('id', 'to_be_deleted_4')
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
+
+          // Add X axis
+          var x = d3.scaleLinear()
+            .domain([my_min_4_1, my_max_4_1])
+            .range([ 0, width ]);
+          svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+          // Add Y axis
+          var y = d3.scaleLinear()
+            .domain([my_min_4_2, my_max_4_2])
+            .range([ height, 0]);
+          svg.append("g")
+            .call(d3.axisLeft(y));
+
+          // Add a scale for bubble size
+          var z = d3.scaleLinear()
+            .domain([my_min_4_3, my_max_4_3])
+            .range([ my_max_4_2 / 15, my_max_4_2 / 8]);
+
+          // Add a scale for bubble color
+          var myColor = d3.scaleOrdinal()
+            .domain(vect_double)
+            .range(myColours.slice(0, vect_double.length));
+
+          // -1- Create a tooltip div that is hidden by default:
+          var tooltip = d3.select("#vis4")
+            .append("div")
+              .style("opacity", 0)
+              .attr("class", "tooltip")
+              .style("background-color", "black")
+              .style("border-radius", "5px")
+              .style("padding", "10px")
+              .style("color", "white")
+
+          // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
+          var showTooltip = function(d) {
+            tooltip
+              .transition()
+              .duration(200)
+            tooltip
+              .style("opacity", 1)
+              .html("Country: " + d.location)
+              .style("left", (d3.mouse(this)[0]+30) + "px")
+              .style("top", (d3.mouse(this)[1]+30) + "px")
+          }
+          var moveTooltip = function(d) {
+            tooltip
+              .style("left", (d3.mouse(this)[0]+30) + "px")
+              .style("top", (d3.mouse(this)[1]+30) + "px")
+          }
+          var hideTooltip = function(d) {
+            tooltip
+              .transition()
+              .duration(200)
+              .style("opacity", 0)
+          }
+
+          // Add dots
+          svg.append('g')
+            .selectAll("dot")
+            .data(data_vis_4)
+            .enter()
+            .append("circle")
+              .attr("class", "bubbles")
+              .attr("cx", function (d) { return x(d[active_feature_4_1]); } )
+              .attr("cy", function (d) { return y(d[active_feature_4_2]); } )
+              .attr("r", function (d) { return z(d[active_feature_4_3]); } )
+              .style("fill", function (d) { return myColor(d.location); } )
+            // -3- Trigger the functions
+            .on("mouseover", showTooltip )
+            .on("mousemove", moveTooltip )
+            .on("mouseleave", hideTooltip )
+      }
+
+      function print_bubble(){
+        // create the selectors
+        // 1
+        $( "#selector_space_vis_4_1" ).append('<label for="name">Select the x-axis:  </label>');
+        var myParent_4_1 = document.getElementById("selector_space_vis_4_1");
+        var selectList = document.createElement("select");
+        selectList.id = "my_select_vis_4_1";
+        // selectList.classList.add('selectpicker');
+        myParent_4_1.appendChild(selectList);
+
+        for (var i = 0; i < features_vis_3.length; i++) {
+          // add the feature selector
+          var option = document.createElement("option");
+          option.value = features_vis_3[i];
+          option.text = features_vis_3[i];
+          selectList.appendChild(option);
+        }
+
+        myParent_4_1.oninput = update_bubble;
+
+        // 2
+        $( "#selector_space_vis_4_2" ).append('<label for="name">Select the y-axis:  </label>');
+        var myParent_4_2 = document.getElementById("selector_space_vis_4_2");
+        var selectList = document.createElement("select");
+        selectList.id = "my_select_vis_4_2";
+        // selectList.classList.add('selectpicker');
+        myParent_4_2.appendChild(selectList);
+
+        for (var i = 0; i < features_vis_3.length; i++) {
+          // add the feature selector
+          var option = document.createElement("option");
+          option.value = features_vis_3[i];
+          option.text = features_vis_3[i];
+          selectList.appendChild(option);
+        }
+
+        myParent_4_2.oninput = update_bubble;
+
+        // 3
+
+        $( "#selector_space_vis_4_3" ).append('<label for="name">Select the radius:  </label>');
+        var myParent_4_3 = document.getElementById("selector_space_vis_4_3");
+        var selectList = document.createElement("select");
+
+        selectList.id = "my_select_vis_4_3";
+        // selectList.classList.add('selectpicker');
+        myParent_4_3.appendChild(selectList);
+
+        for (var i = 0; i < features_vis_3.length; i++) {
+          // add the feature selector
+          var option = document.createElement("option");
+          option.value = features_vis_3[i];
+          option.text = features_vis_3[i];
+          selectList.appendChild(option);
+        }
+
+      myParent_4_3.oninput = update_bubble;
+
+      }
 
 
       // button function
@@ -935,6 +1116,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
                       print_barplot_2();
                       print_lineplot_2();
                       print_map();
+                      print_bubble();
                     } else {
                         document.write("Please select at least a country.");
                     }
@@ -955,7 +1137,9 @@ programming assignment for the VIS 2022S 05.06.22 -->
       		$("#vis3").data("value", [x, y])
     	}
 
-      function stopTracking(){}
+      function stopTracking(){
+          // pass
+      }
 
 
 </script>
@@ -984,6 +1168,14 @@ programming assignment for the VIS 2022S 05.06.22 -->
       background-color: #34eb95;
       padding: 10px;
   }
+
+  .bubbles {
+  stroke-width: 2px;
+  stroke: white;
+  }
+  .bubbles:hover {
+    stroke: black;
+}
  </style>
 
 
