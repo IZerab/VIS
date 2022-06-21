@@ -964,7 +964,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
           // Add X axis
           var x = d3.scaleLinear()
-            .domain([my_min_4_1, my_max_4_1])
+            .domain([my_min_4_1 - my_max_4_3, my_max_4_3 + my_max_4_1])
             .range([ 0, width ]);
           svg.append("g")
             .attr("transform", "translate(0," + height + ")")
@@ -972,7 +972,7 @@ programming assignment for the VIS 2022S 05.06.22 -->
 
           // Add Y axis
           var y = d3.scaleLinear()
-            .domain([my_min_4_2, my_max_4_2])
+            .domain([my_min_4_2 - my_max_4_3, my_max_4_3 + my_max_4_2])
             .range([ height, 0]);
           svg.append("g")
             .call(d3.axisLeft(y));
@@ -980,16 +980,19 @@ programming assignment for the VIS 2022S 05.06.22 -->
           // Add a scale for bubble size
           var z = d3.scaleLinear()
             .domain([my_min_4_3, my_max_4_3])
-            .range([ my_max_4_2 / 15, my_max_4_2 / 8]);
+            .range([ 5, 20]);
 
           // Add a scale for bubble color
           var myColor = d3.scaleOrdinal()
             .domain(vect_double)
             .range(myColours.slice(0, vect_double.length));
 
+          d3.select("#tooltip_id").remove();
+
           // -1- Create a tooltip div that is hidden by default:
           var tooltip = d3.select("#vis4")
             .append("div")
+              .attr('id', 'tooltip_id')
               .style("opacity", 0)
               .attr("class", "tooltip")
               .style("background-color", "black")
@@ -998,27 +1001,27 @@ programming assignment for the VIS 2022S 05.06.22 -->
               .style("color", "white")
 
           // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
-          var showTooltip = function(d) {
-            tooltip
-              .transition()
-              .duration(200)
-            tooltip
-              .style("opacity", 1)
-              .html("Country: " + d.location)
-              .style("left", (d3.mouse(this)[0]+30) + "px")
-              .style("top", (d3.mouse(this)[1]+30) + "px")
-          }
-          var moveTooltip = function(d) {
-            tooltip
-              .style("left", (d3.mouse(this)[0]+30) + "px")
-              .style("top", (d3.mouse(this)[1]+30) + "px")
-          }
-          var hideTooltip = function(d) {
-            tooltip
-              .transition()
-              .duration(200)
-              .style("opacity", 0)
-          }
+          const showTooltip = function(event, d) {
+              tooltip
+                .transition()
+                .duration(200)
+              tooltip
+                .style("opacity", 1)
+                .html("Country: " + d.location + "    " +  active_feature_4_1 + " = " + d[active_feature_4_1] + "    " +  active_feature_4_2 + " = " + d[active_feature_4_2] + "    " +  active_feature_4_3 + " = " + d[active_feature_4_3] )
+                .style("left", (event.x)/2 + "px")
+                .style("top", (event.y)/2+30 + "px")
+            }
+            const moveTooltip = function(event, d) {
+              tooltip
+                .style("left", (event.x)/2 + "px")
+                .style("top", (event.y)/2+30 + "px")
+            }
+            const hideTooltip = function(event, d) {
+              tooltip
+                .transition()
+                .duration(200)
+                .style("opacity", 0)
+            }
 
           // Add dots
           svg.append('g')
@@ -1035,6 +1038,64 @@ programming assignment for the VIS 2022S 05.06.22 -->
             .on("mouseover", showTooltip )
             .on("mousemove", moveTooltip )
             .on("mouseleave", hideTooltip )
+
+
+
+
+        // let brush = d3.brushX()
+        //     .extent([[0, 0], [width, height]])
+        //     .on("brush end", brushed);
+
+        let zoom = d3.zoom()
+            .scaleExtent([1, Infinity])
+            .translateExtent([[0, 0], [width, height]])
+            .extent([[0, 0], [width, height]])
+            .on("zoom", zoomed);
+
+        // function brushed(event) {
+        //     let datarange = [];
+        //     if (sourceEvent === "zoom") return; // ignore brush-by-zoom
+        //     sourceEvent = "brush";
+        //     let s = event.selection || x2.range();
+        //     x.domain(s.map(x2.invert, x2));
+        //     focus.select(".area").attr("d", area);
+        //     focus.select(".axis--x").call(xAxis);
+        //     svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+        //         .scale(width / (s[1] - s[0]))
+        //         .translate(-s[0], 0));
+        //     sourceEvent = null;
+        //     shape_date = s;
+        //     x_range = x;
+        //
+        //     // min_max(shape_date,x_range,length_data)
+        //     data_map_country = data.filter(d => d.iso_code == choosen_country)
+        //     selected_min_day = data_map_country[Math.round((s[0]*length_data_map_country)/x.range()[1])]
+        //     selected_max_day = data_map_country[Math.round((s[1]*length_data_map_country)/x.range()[1])-1]
+        //     change_selected_print_date(shape_date,selected_min_day,selected_max_day)
+        //
+        //     data_map_country = data_map_country.filter(d => d.date >= selected_min_day.date && d.date <= selected_max_day.date)
+        //     vis_3_compute_plot(data_map_country,vis_3_select_column,Boolean(false))
+        //     vis_2_compute_plot(data_map_country,vis_2_select_column_1,vis_2_select_column_2,Boolean(false))
+        //     create_table(data_map_country,Boolean(false))
+        //     table_2_3(data_map_country,Boolean(false))
+        //     plot_graph_vis_4(data,data_map_country,Boolean(false))
+        // }
+
+        function zoomed(event) {
+            let datarange = [];
+            sourceEvent = "zoom";
+            let t = event.transform;
+            x.domain(t.rescaleX(x).domain());
+            focus.select(".area").attr("d", area);
+            focus.select(".axis--x").call(xAxis);
+            context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
+            sourceEvent = null;
+        }
+
+
+
+        svg.call(zoom);
+
       }
 
       function print_bubble(){
@@ -1140,6 +1201,16 @@ programming assignment for the VIS 2022S 05.06.22 -->
       function stopTracking(){
           // pass
       }
+
+
+
+      // let zoom = d3.zoom()
+      //     .scaleExtent([1, 8])
+      //     .on('zoom', function(event) {
+      //         map_element.selectAll('path')
+      //          .attr('transform', event.transform);
+      // });
+
 
 
 </script>
